@@ -1,0 +1,295 @@
+#include <string.h>
+#include "app_error.h"
+#include "sys.h"
+#include "nrf_drv_twi.h"
+#include "nrf_delay.h"
+#include "app_util_platform.h"
+#if TWI_ENABLED
+/* TWI instance ID. */
+#define TWI_INSTANCE_ID     0
+/* Indicates if operation on TWI has ended. */
+static volatile bool m_xfer_done = false;
+/* TWI instance. */
+
+static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+
+static uint8_t s_ucI2cBuf[260];
+static uint8_t s_ucPcbLenBuf[2];
+/**
+ * @brief TWI events handler.
+ */
+
+void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
+{
+    switch (p_event->type)
+    {
+        case NRF_DRV_TWI_EVT_DONE:
+            if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
+            {
+                //data_handler(m_sample);
+            }
+            m_xfer_done = true;
+            break;
+        default:
+            break;
+    }
+}
+
+//write saddr only
+static uint8_t I2C_quick_command_write(void)
+{
+
+	ret_code_t err_code;
+	uint8_t saddr=0x48;
+//	uint16_t counter = 0 ;
+
+	err_code = nrf_drv_twi_tx(&m_twi, saddr, s_ucI2cBuf, 0, true);	
+	APP_ERROR_CHECK(err_code);
+
+	return true;
+}
+// read saddr
+static uint8_t I2C_quick_command_read(void)
+{
+
+//	uint16_t counter = 0 ;
+	uint8_t saddr=0x48;
+	ret_code_t err_code;
+
+	err_code = nrf_drv_twi_rx(&m_twi, saddr, s_ucI2cBuf, 0);	
+	APP_ERROR_CHECK(err_code);
+
+	return true;
+}
+/*****************************************************************************
+函数:  I2C_PowerDown
+输入:	ucMode:0 is powerdown;1 is powerdown_for_coldreset
+输出:	无
+ 		
+返回:	false/true
+ 		
+功能:  对双设备执行PowerDown用来切换PWRSAV状态
+				
+******************************************************************************/
+uint8_t I2C_PowerDown(uint8_t ucMode)
+{
+	uint8_t state=0x00;
+	if(ucMode==0x00)
+	{
+		state=I2C_quick_command_write();
+	}
+	else
+	{
+		state=I2C_quick_command_read();
+	}
+	return state;
+}
+
+/*****************************************************************************
+函数:  I2C_ReadDataByPcb
+输入:	ucInPcb:主设备的Pcb值
+			pusOutLen:要求读取最大长度
+输出:	pOutBuf:从设备相应的数据指针（数据域中第一个为PCB）
+			ucResLen:从设备相应的数据长度,当为1时表示只返回pcb
+ 		
+返回:	false/true
+ 		
+功能:  对双设备执行PowerDown用来切换PWRSAV状态
+				
+******************************************************************************/
+uint8_t I2C_ReadDataByPcb( uint8_t ucInPcb,uint8_t *revice_pcb ,uint8_t *pOutBuf, uint16_t *pusOutLen)
+{
+	I2C_PCB_BYTE_WRITE(ucInPcb);
+	return I2C_nBYTE_READ(0x48,revice_pcb,pOutBuf,pusOutLen);	
+}
+ /*****************************************************************************
+函数:  I2C_BlockWrite
+输入:	ucInPcb:主设备的pcb值
+				pInBuf:	 要写入数据首地址指针
+				ucInLen:	要写入数据长度(小于256)
+输出:	无
+			无
+ 		
+返回:	true/false
+ 		
+功能:  向从设备写入小于等于一包长度的数据
+				
+******************************************************************************/
+uint8_t I2C_BlockWrite( uint8_t ucInPcb, uint8_t *pInBuf, uint16_t ucInLen)
+{
+	return I2C_nBYTE_WRITE(0x48, ucInPcb, pInBuf, ucInLen);
+}
+
+
+uint8_t I2C_nBYTE_READ(uint8_t saddr, uint8_t *reg_pcb, uint8_t *buffer, uint16_t *len)
+{
+
+	ret_code_t err_code;
+	uint16_t counter = 0 ;
+	//先接收一个长度和PCB字节字节
+	err_code = nrf_drv_twi_rx(&m_twi, saddr, s_ucI2cBuf, (uint8_t)*len);	
+	APP_ERROR_CHECK(err_code);
+	while (m_xfer_done == false)
+	{
+		nrf_delay_us(100);
+		if(counter++ >5000) //1s timerout
+		{
+			return false ;
+		}			
+	}
+	m_xfer_done = false ;
+	*reg_pcb = s_ucI2cBuf[1] ;
+	
+	//根据长度接收后续字节
+//	err_code = nrf_drv_twi_rx(&m_twi, saddr, buffer, buffer[0]);	
+//	APP_ERROR_CHECK(err_code);
+//	while (m_xfer_done == false);	
+//	m_xfer_done = false ;
+	if (s_ucI2cBuf[0] > 0x01)
+	{
+		*len = ((uint16_t)s_ucI2cBuf[0]&0x00FF)-1 ;
+		memmove(buffer,&s_ucI2cBuf[2],*len);
+	}
+	else
+	{
+		*len = 0 ;
+	}
+
+	return true;
+}
+
+
+
+/**
+ ****************************************************************************************
+ * @brief Write n byte data to i2c device
+ * *
+ * @param[in]  saddr         slave device address(7bits, without R/W bit)
+ * @param[in]  reg_addr      device register address  //pcb
+ * @param[in]  buffer        pointer to write data
+ * @param[in]  len           write data length
+ * @description
+ *  Write n byte data to slave device. The write starting address is 8 bits. The data is from
+ *  the buffer and n is a specified length
+ *****************************************************************************************
+ */
+uint8_t I2C_nBYTE_WRITE(uint8_t saddr, uint8_t reg_addr, uint8_t *buffer, uint16_t len)
+{
+
+	ret_code_t err_code;
+	uint16_t counter = 0 ;
+	//Store environment parameters
+	s_ucI2cBuf[0] = reg_addr;
+	s_ucI2cBuf[1] = len;
+	if(len > 0)
+	{
+		memmove(&s_ucI2cBuf[2],buffer,len);
+	}
+	err_code = nrf_drv_twi_tx(&m_twi, saddr, s_ucI2cBuf, 2+len, true);	
+	APP_ERROR_CHECK(err_code);
+	while (m_xfer_done == false)
+	{
+		nrf_delay_us(100);
+		if(counter++ >1000) //100Ms timerout
+		{
+			return false ;
+		}			
+	}
+	m_xfer_done = false ;
+
+	return true;
+}
+
+/**
+ ****************************************************************************************
+ * @brief Write n byte data to i2c device
+ * *
+ * @param[in]  ucPcb      device register address
+ * @description
+ *  Write a byte data to slave device. The write starting address is 8 bits. The data is from
+ *  the buffer and n is a specified length
+ *****************************************************************************************
+ */
+uint8_t I2C_PCB_BYTE_WRITE(uint8_t ucPcb)
+{
+
+	ret_code_t err_code;
+	uint8_t saddr = 0x48 ;
+	uint16_t counter = 0 ;
+	//Store environment parameters
+	s_ucPcbLenBuf[0] = ucPcb;
+
+	err_code = nrf_drv_twi_tx(&m_twi, saddr, s_ucPcbLenBuf, 1, true);	
+	APP_ERROR_CHECK(err_code);
+	while (m_xfer_done == false)
+	{
+		nrf_delay_us(100);
+		if(counter++ >100) //10Ms timerout
+		{
+			return false ;
+		}			
+	}
+	m_xfer_done = false ;	
+
+	return true;
+}
+
+uint8_t I2C_WritePcb_GetLenPcb(uint8_t ucInPcb, uint8_t * ucOutPcb)
+{
+
+	ret_code_t err_code;
+	uint8_t saddr = 0x48 ;
+	uint16_t counter = 0 ;
+	//Store environment parameters
+	s_ucPcbLenBuf[0] = ucInPcb;
+	//write pcb
+	err_code = nrf_drv_twi_tx(&m_twi, saddr, s_ucPcbLenBuf, 1, true);	
+	APP_ERROR_CHECK(err_code);
+	while (m_xfer_done == false)
+	{
+		nrf_delay_us(100);
+		if(counter++ >100) //10Ms timerout
+		{
+			return false ;
+		}			
+	}
+	m_xfer_done = false ;	
+	//read len & pcb
+	counter = 0 ;
+	err_code = nrf_drv_twi_rx(&m_twi, saddr, s_ucPcbLenBuf, 2);	
+	APP_ERROR_CHECK(err_code);
+	while (m_xfer_done == false)
+	{
+		nrf_delay_us(100);
+		if(counter++ >500) //50Ms timerout
+		{
+			return false ;
+		}			
+	}
+	m_xfer_done = false ;	
+
+	*ucOutPcb = s_ucPcbLenBuf[1] ;
+
+	return true;
+	
+}
+
+
+void twi_init(void)
+{
+    ret_code_t err_code;
+
+    const nrf_drv_twi_config_t twi_lm75b_config = {
+       .scl                = IO_I2C_SCL , //ARDUINO_SCL_PIN,
+       .sda                = IO_I2C_SDA , //ARDUINO_SDA_PIN,
+       .frequency          = NRF_TWI_FREQ_100K,
+       .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
+       .clear_bus_init     = false
+    };
+
+    err_code = nrf_drv_twi_init(&m_twi, &twi_lm75b_config, twi_handler, NULL);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_twi_enable(&m_twi);
+}
+#endif
