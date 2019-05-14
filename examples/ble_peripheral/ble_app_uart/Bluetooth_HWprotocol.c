@@ -187,7 +187,6 @@ unsigned char CheckTP(TimProg* T)
 {
 	if(T->T_1 == 0)
 		return 1;
-
     if((timer0_sec_count)<(T->T_1))
     	{
           return 1;
@@ -213,7 +212,9 @@ void ble_transfer_init(void)
 	ucResend = 0;
 }
 
-int all_packet_received(uint8_t beginPos, uint8_t packetCount, uint8_t* packetBitmap) {
+
+int all_packet_received(uint8_t beginPos, uint8_t packetCount, uint8_t* packetBitmap) 
+{
     int fullBytes = (packetCount - 1) / 8;  // count start from 1
     int remBits = packetCount % 8;
     uint8_t remByte;
@@ -303,15 +304,16 @@ void phone_to_ble_data_parse(uint8_t * p_data, uint16_t buf_len)
 		ucExpPackN = NextExpPack(p_data[0], ucaPackMsg+2);
 
 		if(Apdufinsh==0)
-			{
-			 Apdufinsh=2; 
-			 g_apdu_length=buf_len-2;
-			}
+		{
+		 Apdufinsh=2; 
+		 g_apdu_length=buf_len-2;
+		}
 		else
-			{
-			  g_apdu_length += buf_len-2;
-			}
-			
+		{
+		  g_apdu_length += buf_len-2;
+		}
+
+		//if((p_data[0] == (p_data[1]-1)) || (ucaPackMsg[3] == 0))		
 		if (all_packet_received(p_data[0], p_data[1], ucaRevPackN))
 		{
 			TP_CLOSE(&T_Connect);
@@ -538,7 +540,7 @@ void Bluetooth_ReciveANDSend(void * p_event_data, uint16_t event_size)
 				TP_START(&T_Connect,TimeOver);
 				ucReTry++;
 			}
-				else
+			else
 			{
 				TP_CLOSE(&T_Connect);
 				ble_transfer_init();

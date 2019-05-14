@@ -14,7 +14,7 @@
 #include "pstorage.h"
 #include "flashmcu_bithd.h"
 #include "app_scheduler.h"
-
+#include "peer_manager.h"
 
 BluetoothData communicationBluetooth={&g_apdu[0],&g_apdu[1],&g_apdu[3],&g_apdu[4]};//save recive data pointer
 unsigned char CMD09_oldlabel=0;   
@@ -113,18 +113,27 @@ void setup_time_f(unsigned char* value)
 balance seting
 *************************/
 void setup_balance_f(unsigned char* value)
-{
-	#if 0
-	unsigned char i;
-	unsigned char buf[16];
-	unsigned char* p;
+{	
+//	unsigned char 	 i;
+//	unsigned char 	 buf[16];
+	//unsigned char	*p;
 
     //update balance
     memcpy(&coinbalance,value,balnace_usefsize);
-	p=(unsigned char*)&coinbalance;
+//	p=(unsigned char*)&coinbalance;
 	//flash storage
 	//Save balance data to flash
 
+	#if 0
+	for(uint8_t i=0;i<16;i++)
+	{
+		g_flashbuff[i] = uiSRAM_UcharToDword(&value[i*4]);
+	}
+	
+	fds_test_write(BALLANCE_FILE_ID,g_flashbuff,16);		
+	#endif
+	
+#if 0
 	for(i=0;i<4;i++)
 	{
 		pstorage_block_identifier_get(&base_handle,balance_storgeblock+i, &USEblock_handle);			
@@ -135,12 +144,23 @@ void setup_balance_f(unsigned char* value)
 		pstorage_store(&USEblock_handle,p+i*16,16,0);
 		while(pstorage_wait_flag==1);			
 	}
+#endif
 
+	#if 0
 	//Save coinkind and flag
 	for(i=1;i<9;i++)
 	{
 		buf[i+7]=i;
 	}
+	for(uint8_t i=0;i<16;i++)
+	{
+		g_flashbuff[i] = uiSRAM_UcharToDword(&buf[i*4]);
+	}
+	
+	fds_test_write(FLAG_FILE_ID,g_flashbuff,2);
+	#endif
+	
+#if 0	
     pstorage_block_identifier_get(&base_handle,65, &USEblock_handle);			
 	pstorage_wait_flag=1;
 	pstorage_clear(&USEblock_handle, 16);
@@ -149,6 +169,7 @@ void setup_balance_f(unsigned char* value)
 	pstorage_store(&USEblock_handle,buf,16,0);
 	while(pstorage_wait_flag==1);	
 #endif
+
 	Send_bluetoothdata(1);
 }
 
@@ -362,58 +383,75 @@ void blueKEY_cmdid_F(void)
 
 
 ///////////////////////////////////////FLASH read or write//////////////////////////
-void blue_writeflash(unsigned char* buf)
+void blue_writeflash(unsigned char* buf, uint16_t len)
 {
-#if 0
-	unsigned char i;
-	unsigned char j=buf[0];
-	unsigned char bufdata[64];
-	memcpy(bufdata,&buf[1],64);
-	//Save time data to flash
-	for(i=0;i<4;i++)
-	{
-		pstorage_block_identifier_get(&base_handle,67+j*4+i, &USEblock_handle);			
-		pstorage_wait_flag=1;
-		pstorage_clear(&USEblock_handle,16);
-		while(pstorage_wait_flag==1);//??flash????	
-		pstorage_wait_flag=1;
+	uint8_t ret_len=1;
+	ret_code_t ret;
+	uint8_t file_id;
 
-		pstorage_store(&USEblock_handle,&bufdata[i*16],16,0);
-		while(pstorage_wait_flag==1);			
+	file_id = buf[0];
+	len --;
+
+	uint8_t* pfb = (uint8_t*) g_flashbuff;
+	pfb[0] = len >> 8;
+	pfb[1] = len & 0xff;
+	memcpy(pfb + 2, buf+1, len);
+
+	len += 2;
+	if(len<=128)
+	{
+		ret = fds_test_write(file_id, g_flashbuff, (len + 3) / 4);	
 	}
-#endif
-	Send_bluetoothdata(1); 	         
+	
+	if((ret != 0)||(len>128))
+	{
+		ret_len += 2;
+		communicationBluetooth.data[1] = 0x02;
+		communicationBluetooth.data[2] = 0x03;
+	}
+	Send_bluetoothdata(ret_len); 	         
 }
 
 void blue_readflash(unsigned char address)
-{
-#if 0
-	unsigned char i;
-	unsigned char buf[64];
-	
-	for(i=0;i<4;i++)
-	{
-		pstorage_block_identifier_get(&base_handle,67+address*4+i, &USEblock_handle);			
-		pstorage_wait_flag=1;
-		pstorage_load(&buf[16*i], &USEblock_handle,16, 0);
-		while(pstorage_wait_flag==1);		
-	}
+{	
+	ret_code_t ret;
+	uint16_t len=0;
+	uint16_t words;
+	uint8_t file_id;
+	uint8_t* pfb = (uint8_t*)g_flashbuff;
 
-	memcpy(&communicationBluetooth.data[1],buf,64);	
-#endif	
-	Send_bluetoothdata(65);
+	file_id = address;
+	ret = fds_read(file_id, g_flashbuff, &words);
+	len = (((uint16_t)pfb[0]) << 8) + pfb[1];
+	// TODO check (len + 3) / 4 == words 
+	
+	if(len<=128)
+	{
+		memcpy(&communicationBluetooth.data[1], pfb+2, len);
+	}
+	
+	if((ret != 0)||(len>128))
+	{
+		len+=2;
+		communicationBluetooth.data[1] = 0x02;
+		communicationBluetooth.data[2] = 0x03;
+	}
+	
+	Send_bluetoothdata(len+1);
 }
 
 void flashwriteread_F(void)
 {
+	uint16_t L=(communicationBluetooth.length[0]<<8)|communicationBluetooth.length[1];
 
+	L -=4;
 	switch(communicationBluetooth.data[0])
 	{
 		case 0x01://write flash
-			//blue_writeflash(&communicationBluetooth.data[1]);
+			blue_writeflash(&communicationBluetooth.data[1],L);
 			break;
 		case 0x02://read flash
-			//blue_readflash(communicationBluetooth.data[1]);
+			blue_readflash(communicationBluetooth.data[1]);
 			break;
 	}
 }

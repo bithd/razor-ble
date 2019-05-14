@@ -13,7 +13,6 @@ unsigned char	Time_stuts=TimeDataDisPl; //time/balance function select
 unsigned char stm32timer[9];              //save time cmd data
 unsigned char flagtimerstm32=0;
 unsigned char flagbalancestm32=0;
-coin_Attr coinbalance={0};
 
 //debug test
 UTCTime SecondCountRTC=0;
@@ -193,6 +192,8 @@ void timedisplay(void * p_event_data, uint16_t event_size)
 		case BalanceDisplay:       f_BalanceDisplay();
 		break;
 		case BrodcastnameDisplay:  f_BrodcastnameDisplay();
+		break;
+		default:
 		break;
 	}
 

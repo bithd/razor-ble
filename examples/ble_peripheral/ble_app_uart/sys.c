@@ -19,7 +19,6 @@
 #include "nrf_delay.h"
 #include "ble_hci.h"
 #include "ble_advertising.h"
-#include <fds.h>
 #include "ble_conn_params.h"
 #include "peer_manager.h"
 #include "Timer_Interrupt_Function.h"
@@ -27,11 +26,7 @@
 #include "ble_bithd.h"
 #include "uart_bithd.h"
 #include "timedis.h"
-
-//name&tk record id
-#define NAMETK_FILE_ID     0x1111
-#define NAMETK_REC_KEY     0x2222
-
+#include "flashmcu_bithd.h"
 
 ///////////////////////////////////
 uint8_t  g_timeout_shutdown = SHUTDOWN_TIME;
@@ -62,7 +57,6 @@ uint8_t g_ucBtName[BLENAMELEN+6] = "BITHDABCDEF" ;  // ±£´æÀ¶ÑÀ¹ã²¥Ãû³Æ
 uint8_t g_ucBleTK[BLETKLEN] = "123456" ; 
 char DEVICE_NAME[20]="RAZOR";//"bithd001122334455";
 
-static uint32_t s_uaNameTKBuf[8];
 static uint8_t 	s_uaTempSendBuf[16];
 uint8_t g_transfer_buff[512];
 
@@ -78,6 +72,10 @@ uint8_t g_FlagApdufinsh=RCV_INIT;
 uint8_t g_UartFlag=0;
 uint8_t g_ChargeFlag = INIT_CHARGE;
 uint16_t g_BatLevel = 0;
+uint32_t g_flashbuff[64];
+uint16_t		buf_size=64;
+volatile uint8_t write_flag=0;
+coin_Attr coinbalance={0};
 
 
 //ä¹‹åŽè¦æ›¿æ¢æˆåˆ«çš„å˜é‡
@@ -100,6 +98,7 @@ APP_TIMER_DEF(Motor_id);
 APP_TIMER_DEF(Timeout1Sec_Uart_id);
 APP_TIMER_DEF(chargestatus_time_id);
 APP_TIMER_DEF(wallClockID);
+
 
 
 /*****************************************************************************
@@ -156,9 +155,12 @@ static void vSYS_Timer50MSHandler(void * p_context)
 		if(s_LongPressCount >= 30)
 		{
 			s_LongPressCount = 0;
-			STM_POWER_OFF(); 
-			BT_POWER_OFF();	
-			while(1);
+			if(g_ChargeFlag == INIT_CHARGE)
+			{
+				STM_POWER_OFF(); 
+				BT_POWER_OFF();	
+				while(1);
+			}						
 		}		
 	}
 	
@@ -186,10 +188,11 @@ static void vSYS_Timer50MSHandler(void * p_context)
 	if(GET_USB_INSERT() == GPIO_LOW)
 	{
 		g_ChargeFlag = YES_CHARGE;
+		g_timeout_shutdown = SHUTDOWN_TIME;
 	}
 	else
 	{
-		g_ChargeFlag = MV_CHARGE;
+		g_ChargeFlag = INIT_CHARGE;
 	}
 	
 }
@@ -363,57 +366,6 @@ void vSYS_UpdateConnPrarmter(void)
 	APP_ERROR_CHECK(err_code);
 	
 }
-
-extern uint8_t g_ucRecordOpComplete ;
-bool uiSYS_WriteNameTKRecord(uint8_t *pucBuf,uint16_t usLen)
-{
-	uint16_t temlen;
-
-	if (0 == usLen)	return 0;
-	temlen = ((usLen-1)/4+1)*4 ; 
-	//copy to namebuf
-	memset((void*)s_uaNameTKBuf,0,sizeof(s_uaNameTKBuf));
-	memcpy((void*)s_uaNameTKBuf,pucBuf,usLen);
-	
-	fds_record_t        record;
-	fds_record_desc_t   record_desc;
-	fds_record_chunk_t  record_chunk;
-
-	// Set up data.
-	record_chunk.p_data         = &s_uaNameTKBuf[0];
-	record_chunk.length_words   = (temlen>>2);
-
-	// Set up record.
-	record.file_id           = NAMETK_FILE_ID;
-	record.key               = NAMETK_REC_KEY;
-	record.data.p_chunks     = &record_chunk;
-	record.data.num_chunks   = 1;
-	g_ucRecordOpComplete = 0 ;		
-	ret_code_t ret = fds_record_write(&record_desc, &record);
-	if (ret != FDS_SUCCESS)
-	{
-			// Handle error.
-		return false ;
-	}
-	while(g_ucRecordOpComplete == 0);
-	return true;
-}
-void uiSYS_ReadNameTKRecord(void)
-{
-	uint32_t i ;
-	if (('U' == *(uint8_t *)NAME_ADDR)&&('2'==*((uint8_t *)NAME_ADDR+1)))
-	{
-		for(i=0;i<12;i++)
-		{
-			g_ucBtName[i] = *((uint8_t *)NAME_ADDR+i) ;
-		}
-		for(i=12;i<NAMETK_LEN;i++)
-		{
-			g_ucBleTK[i-12] = *((uint8_t *)NAME_ADDR+i) ;
-		}	
-	}
-}
-
 
 /*****************************************************************************
  º¯Êý:  vSYS_CheckWorkMode
@@ -631,40 +583,9 @@ void change_NFCPIN(void)
         }
 }
 
-#include "pstorage_platform.h"
-#include "timedis.h"
-#define adress PSTORAGE_DATA_START_ADDR+0x400
 
 void system_init(void)
 {		
-#if 0
-	unsigned char buf123[16];
-	unsigned char buf456[]={1,2,3,4,5,6,7,8};
-	unsigned char* p;
-
-	// Initialize.
-	p=(unsigned char*)(adress+0x00000400);//0x38400
-	memcpy(buf123,p,16);
-	if(0==memcmp(buf456,&buf123[8],8))
-	{
-	  pstorage_flag=1;
-	  memcpy((unsigned char*)(&SecondCountRTC),buf123,4);
-	}
-	else
-	{
-	  pstorage_flag=0;
-	}
-
-	p=(unsigned char*)((adress+0x400)+16);
-	memcpy(buf123,p,16);
-	if(0==memcmp(buf456,&buf123[8],8))
-	{
-	  pstorage_flag=2;
-	  p=(unsigned char*)(adress);
-	  memcpy((unsigned char*)(&coinbalance),p,64);
-	}
-#endif
-
 	change_NFCPIN();
 	
 	usr_gpio_init();

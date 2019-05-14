@@ -11,14 +11,14 @@
 //#define DEVICE_NAME                     "RAZOR0000001"//"RAZOR"//                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "bithd.com"                       /**< Manufacturer. Will be passed to Device Information Service. */
 #define FW_VERSION                			"4.0.0"                       /**< FW. Will be passed to Device Information Service. */
-
+c
 
 #define ONE_50MS_INTERVAL			   	APP_TIMER_TICKS(50) 
 #define ONE_SECOND_INTERVAL			   	APP_TIMER_TICKS(500) 
 #define T_SHUTDOWN_TIMEOUT				APP_TIMER_TICKS(3000)
 #define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(400)                        /**< Delay after connection until Security Request is sent, if necessary (ticks). */
 
-#define SHUTDOWN_TIME					40  //3*x40=120s
+#define SHUTDOWN_TIME					200  //3*x200=600s
 
 #define DATAFIELD_MAX_LEN		1024
 #define APDU_HEAD_LEN			8
@@ -170,6 +170,20 @@ typedef  struct
 		uint8_t 	s_ucBackUpCmd;     //备份当前命令
 }StructBle;
 
+typedef struct
+{
+	unsigned char coin_name[32];
+	unsigned char balance[10];
+	unsigned char balance_after_di[10];
+	unsigned char year[2];
+	unsigned char  month;
+	unsigned char day;
+	unsigned char hour;
+	unsigned char minute;
+	unsigned char second;
+	unsigned char Nousebuf[5];
+}coin_Attr;
+
 //bit7  bit6  bit5  bit4  bit3  bit2  bit1  bit0
 // |     |     |     |     |     |     |     |
 // |     |     |     |     |     |     |      ------停止广播完成 
@@ -248,6 +262,10 @@ extern uint8_t g_ChargeFlag;
 extern uint16_t g_BatLevel;
 extern uint8_t g_Key1Status;
 extern char DEVICE_NAME[20];
+extern uint32_t g_flashbuff[64];
+extern uint16_t		buf_size;
+extern volatile uint8_t write_flag;
+extern coin_Attr coinbalance;
 
 
 OTHER_TIMER_ID(m_50ms_timer_id);												/*data process*/
@@ -270,7 +288,6 @@ extern uint32_t start_req_timer(void);
 extern uint32_t stop_req_timer(void);
 
 void vSYS_UpdateConnPrarmter(void);
-//bool uiSYS_WriteNameTKRecord(uint8_t *pucBuf,uint16_t usLen);
 void uiSYS_ReadNameTKRecord(void);
 void vSYS_APPTimers_Start(void);
 void system_init(void);
@@ -280,5 +297,7 @@ void vSYS_JuageNeedKey( void );
 bool bSYS_FidoToApdu(uint8_t *pData,uint16_t *len);
 void vSYS_ReturnKeepAlive(uint8_t usStstus);
 void vSYS_WriteUICR( uint32_t *pBuf,uint8_t ucDwordLen,uint8_t ucOffset);
+
+extern uint32_t uiSRAM_UcharToDword(uint8_t * pucSrc);
 
 #endif /* _SYS_H_ */

@@ -1,4 +1,4 @@
-
+c
 
 #ifndef SDK_CONFIG_H
 #define SDK_CONFIG_H
@@ -3223,7 +3223,7 @@
 // <i> @ref FDS_VIRTUAL_PAGE_SIZE * 4 bytes.
 
 #ifndef FDS_VIRTUAL_PAGES
-#define FDS_VIRTUAL_PAGES 3
+#define FDS_VIRTUAL_PAGES 6//3
 #endif
 
 // <o> FDS_VIRTUAL_PAGE_SIZE  - The size of a virtual page of flash memory, expressed in number of 4-byte words.

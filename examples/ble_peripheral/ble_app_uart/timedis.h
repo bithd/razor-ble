@@ -18,21 +18,8 @@
 //debug test
 typedef uint32_t UTCTime; /* used to store the second counts for RTC */
 
-typedef struct
-{
-	unsigned char coin_name[32];
-	unsigned char balance[10];
-	unsigned char balance_after_di[10];
-	unsigned char year[2];
-	unsigned char  month;
-	unsigned char day;
-	unsigned char hour;
-	unsigned char minute;
-	unsigned char second;
-	unsigned char Nousebuf[5];
-}coin_Attr;
+
 extern unsigned char	Time_stuts;
-extern coin_Attr coinbalance;
 extern unsigned char stm32timer[9];
 extern unsigned char timedisp_status;
 extern unsigned char flagtimerstm32;

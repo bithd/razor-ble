@@ -928,7 +928,10 @@ int main(void)
 	advertising_init();
 	conn_params_init();	
 	peer_manager_init(erase_bonds);	
-	//mcuflash_init();
+	err_code =fds_usr_init();
+	//err_code =fds_test();
+	
+	APP_ERROR_CHECK(err_code);
 	vSYS_APPTimers_Start();
 	err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
 	APP_ERROR_CHECK(err_code);

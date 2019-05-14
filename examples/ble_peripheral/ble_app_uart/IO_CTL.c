@@ -39,6 +39,7 @@ void usr_gpio_init(void)
 	{
 		BT_POWER_ON();
 		STM_POWER_ON(); 
+		return;
 	}
 	
 	while(GET_PWKEY_STATUS() == GPIO_HIGH)
