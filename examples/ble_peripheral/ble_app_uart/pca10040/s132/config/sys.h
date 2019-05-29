@@ -11,7 +11,7 @@
 //#define DEVICE_NAME                     "RAZOR0000001"//"RAZOR"//                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "bithd.com"                       /**< Manufacturer. Will be passed to Device Information Service. */
 #define FW_VERSION                			"4.0.0"                       /**< FW. Will be passed to Device Information Service. */
-c
+
 
 #define ONE_50MS_INTERVAL			   	APP_TIMER_TICKS(50) 
 #define ONE_SECOND_INTERVAL			   	APP_TIMER_TICKS(500) 
