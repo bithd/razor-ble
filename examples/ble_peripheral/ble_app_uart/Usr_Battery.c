@@ -14,6 +14,7 @@
 #include "app_timer.h"
 #include "sys.h"
 #include "sensorsim.h"
+#include "ADC_BITHD.h"
 
 #if NRF_MODULE_ENABLED(BLE_BAS)
 
@@ -40,10 +41,11 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, 1);
         APP_ERROR_CHECK(err_code);
         //batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) + DIODE_FWD_VOLT_DROP_MILLIVOLTS;
-        batt_lvl_in_milli_volts = 4*ADC_RESULT_IN_MILLI_VOLTS(adc_result);        
+        batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result);        
         percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
-		
-		g_BatLevel = batt_lvl_in_milli_volts;
+
+		g_BatLevel = percentage_batt_lvl;
+		adc_sample = 4*batt_lvl_in_milli_volts;
 		
         err_code = ble_bas_battery_level_update(&m_bas, percentage_batt_lvl);
         if (
@@ -59,9 +61,9 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
             APP_ERROR_HANDLER(err_code);
         }
 
-		//nrf_drv_saadc_uninit();
-		//NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear<<SAADC_INTENCLR_END_Pos) ;
-		//NVIC_ClearPendingIRQ(SAADC_IRQn);
+		nrf_drv_saadc_uninit();
+		NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear<<SAADC_INTENCLR_END_Pos) ;
+		NVIC_ClearPendingIRQ(SAADC_IRQn);
     }
 }
 
@@ -157,10 +159,12 @@ void battery_level_meas_timeout_handler(void * p_context)
 {
 	uint32_t err_code;
 	
-    UNUSED_PARAMETER(p_context);    
-    err_code = nrf_drv_saadc_sample();
-    APP_ERROR_CHECK(err_code);
-   
+	UNUSED_PARAMETER(p_context);
+	adc_configure();
+	err_code = nrf_drv_saadc_sample();
+	APP_ERROR_CHECK(err_code);
+	
+	chargingBat();
 }
 
 #endif

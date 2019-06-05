@@ -14,7 +14,6 @@
 unsigned char                  Touch_timercount=0;               
 //app_timer_id_t                 Scan_Touch_timer_id;            
 //app_timer_id_t                 wallClockID;     
-//app_timer_id_t                 ADCworkID;    
 
 unsigned char                  Timeout3Sec_StarFlag=TimeClose;    
 

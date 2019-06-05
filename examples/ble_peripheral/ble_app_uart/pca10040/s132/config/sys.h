@@ -276,7 +276,6 @@ OTHER_TIMER_ID(m_battery_timer_id);  											/**< Battery measurement timer. 
 OTHER_TIMER_ID(balance_id);
 OTHER_TIMER_ID(Timeout1Sec_Uart_id);
 OTHER_TIMER_ID(Timeout3Sec_id);
-OTHER_TIMER_ID(ADCworkID);
 OTHER_TIMER_ID(Timeout1Sec_f_id);
 OTHER_TIMER_ID(Timeout2ms_blekey_id);
 OTHER_TIMER_ID(Motor_id);

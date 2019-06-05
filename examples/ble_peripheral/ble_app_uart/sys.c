@@ -91,7 +91,6 @@ APP_TIMER_DEF(m_sec_req_timer_id);
 APP_TIMER_DEF(m_battery_timer_id);  											/**< Battery measurement timer. */  
 APP_TIMER_DEF(Timeout3Sec_id);
 APP_TIMER_DEF(balance_id);
-APP_TIMER_DEF(ADCworkID);
 APP_TIMER_DEF(Timeout1Sec_f_id);
 APP_TIMER_DEF(Timeout2ms_blekey_id);
 APP_TIMER_DEF(Motor_id);
@@ -443,8 +442,7 @@ void vSYS_APPTimers_Start(void)
 	//
 	err_code = app_timer_start(wallClockID, ONE_SECOND_INTERVAL_, NULL);    
 	APP_ERROR_CHECK(err_code);
-	err_code = app_timer_start(ADCworkID, ADC_INTERVAL, NULL);              
-	APP_ERROR_CHECK(err_code);
+
 	err_code = app_timer_start(Timeout2ms_blekey_id, bletimeout_INTERVAL, NULL);   
 	APP_ERROR_CHECK(err_code);
 }
@@ -515,10 +513,6 @@ static void usr_timers_init(void)
 								TimerClock_handler);                
     APP_ERROR_CHECK(err_code);
 	
-	err_code = app_timer_create(&ADCworkID, 
-								APP_TIMER_MODE_REPEATED, 
-								ADCwork_handler);                  
-    APP_ERROR_CHECK(err_code);	
     
 	err_code = app_timer_create(&Timeout3Sec_id,
 								APP_TIMER_MODE_SINGLE_SHOT, 
@@ -592,9 +586,7 @@ void system_init(void)
 	
 	usr_ram_init();
 
-	usr_timers_init();
-
-	adc_configure();		
+	usr_timers_init();	
 	
 }
 /*****************************************************************************
