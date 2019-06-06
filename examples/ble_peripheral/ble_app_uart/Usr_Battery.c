@@ -35,17 +35,66 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
         uint16_t          batt_lvl_in_milli_volts;        
         uint8_t           percentage_batt_lvl;
         uint32_t          err_code;
-
+		static uint16_t 		  batt_min_mv;
+		static uint16_t 		  batt_max_mv;
+		static uint8_t 			  count=0;
+		static uint32_t 		  batt_sum=0;
+		static uint8_t 			  flag=0;
+		
         adc_result = p_event->data.done.p_buffer[0];
 
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, 1);
-        APP_ERROR_CHECK(err_code);
-        //batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) + DIODE_FWD_VOLT_DROP_MILLIVOLTS;
-        batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result);        
-        percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
-
-		g_BatLevel = percentage_batt_lvl;
-		adc_sample = 4*batt_lvl_in_milli_volts;
+        APP_ERROR_CHECK(err_code);    
+        
+        if(flag==0)
+        {
+        	flag = 1;
+			batt_min_mv = ADC_RESULT_IN_MILLI_VOLTS(adc_result);
+			percentage_batt_lvl = battery_level_in_percent(batt_min_mv);
+			adc_sample = 4*batt_min_mv;
+			g_BatLevel = percentage_batt_lvl;
+        }else if(flag == 1)
+        {
+			flag = 2;
+			batt_max_mv = ADC_RESULT_IN_MILLI_VOLTS(adc_result);
+        }
+		else if(flag == 2)
+		{
+			flag = 3;
+		}
+		
+        if(flag == 3)
+        {
+			batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result);  
+			if(batt_lvl_in_milli_volts>batt_max_mv)
+			{
+				batt_max_mv = batt_lvl_in_milli_volts;
+			}
+			if(batt_lvl_in_milli_volts < batt_min_mv)
+			{
+				batt_min_mv = batt_lvl_in_milli_volts;
+			}
+			batt_sum += batt_lvl_in_milli_volts;
+        }
+       
+		
+		if(count>=7)
+		{			
+			batt_lvl_in_milli_volts = (uint16_t)((batt_sum-batt_min_mv-batt_max_mv)>>2);
+			percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
+			adc_sample = 4*batt_lvl_in_milli_volts;
+			g_BatLevel = percentage_batt_lvl;
+			//
+			count=0;
+			batt_min_mv = 0;
+			batt_max_mv = 0;
+			batt_sum = 0;
+			flag=0;
+		}
+		else
+		{
+			count++;
+		}					
 		
         err_code = ble_bas_battery_level_update(&m_bas, percentage_batt_lvl);
         if (
