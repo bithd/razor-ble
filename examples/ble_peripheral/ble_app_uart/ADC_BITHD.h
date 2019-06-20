@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 
-#define Full_Voltage             (3900)                     //Full power 4.2V
+#define Full_Voltage             (4000)                     //Full power 4.2V
 #define Warning_Voltage          (3650)                     //warning    3.8V
 #define Lowest_Voltage           (3400)                     //NO power
 #define ADV_BLE_VOLTAGE			 (3450)

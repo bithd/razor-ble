@@ -52,6 +52,7 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
 			batt_min_mv = ADC_RESULT_IN_MILLI_VOLTS(adc_result);
 			percentage_batt_lvl = battery_level_in_percent(batt_min_mv);
 			adc_sample = 4*batt_min_mv;
+			g_bak_AdcSample = adc_sample;
 			g_BatLevel = percentage_batt_lvl;
         }else if(flag == 1)
         {
@@ -83,7 +84,30 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
 			batt_lvl_in_milli_volts = (uint16_t)((batt_sum-batt_min_mv-batt_max_mv)>>2);
 			percentage_batt_lvl = battery_level_in_percent(batt_lvl_in_milli_volts);
 			adc_sample = 4*batt_lvl_in_milli_volts;
-			g_BatLevel = percentage_batt_lvl;
+			
+			if(g_ChargeFlag == INIT_CHARGE)  //No Charge
+			{
+				if(adc_sample<g_bak_AdcSample)
+				{
+					g_bak_AdcSample = adc_sample;
+				}
+				if(percentage_batt_lvl < g_BatLevel)
+				{
+					g_BatLevel = percentage_batt_lvl;
+				}
+			}
+			else if(g_ChargeFlag == YES_CHARGE) //Charging
+			{
+				if(adc_sample>g_bak_AdcSample)
+				{
+					g_bak_AdcSample = adc_sample;
+				}
+				if(percentage_batt_lvl > g_BatLevel)
+				{
+					g_BatLevel = percentage_batt_lvl;
+				}
+			}
+			
 			//
 			count=0;
 			batt_min_mv = 0;

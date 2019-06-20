@@ -76,7 +76,7 @@ uint32_t g_flashbuff[64];
 uint16_t		buf_size=64;
 volatile uint8_t write_flag=0;
 coin_Attr coinbalance={0};
-
+uint16_t g_bak_AdcSample=0;
 
 //之后要替换成别的变量
 unsigned char touch_key      =KEY_NO;                 

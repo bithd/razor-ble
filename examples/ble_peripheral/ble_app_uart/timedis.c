@@ -47,7 +47,7 @@ void Bat(void)
 	if(adc_sample<Lowest_Voltage){batlvl=0;}
 	else
 	{
-		if(adc_sample<Full_Voltage){batlvl=(adc_sample-Lowest_Voltage)*100/(Full_Voltage-Lowest_Voltage);}//get battery level
+		if(adc_sample<Full_Voltage){batlvl = g_BatLevel;}
 		else{batlvl=100;}
 	}
 	stm32timer[8]=batlvl;                                                                                 //save battery level

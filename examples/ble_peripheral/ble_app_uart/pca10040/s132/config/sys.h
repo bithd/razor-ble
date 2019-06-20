@@ -266,7 +266,7 @@ extern uint32_t g_flashbuff[64];
 extern uint16_t		buf_size;
 extern volatile uint8_t write_flag;
 extern coin_Attr coinbalance;
-
+extern uint16_t g_bak_AdcSample;
 
 OTHER_TIMER_ID(m_50ms_timer_id);												/*data process*/
 OTHER_TIMER_ID(m_1second_timer_id);												/*data process*/
