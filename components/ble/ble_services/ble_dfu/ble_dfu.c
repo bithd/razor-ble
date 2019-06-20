@@ -365,7 +365,7 @@ static void on_disconnect(ble_dfu_t * p_dfu, ble_evt_t const * p_ble_evt)
  * @param[in]   p_dfu     DFU Service structure.
  * @param[in]   p_ble_evt Event received from the BLE stack.rtt
  */
-static void on_write(ble_dfu_t * p_dfu, ble_evt_t const * p_ble_evt)
+static void on_write2(ble_dfu_t * p_dfu, ble_evt_t const * p_ble_evt)
 {
     const ble_gatts_evt_write_t * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
@@ -442,7 +442,7 @@ void ble_dfu_on_ble_evt(ble_dfu_t * p_dfu, ble_evt_t * p_ble_evt)
             break;
 
         case BLE_GATTS_EVT_WRITE:
-            on_write(p_dfu, p_ble_evt);
+            on_write2(p_dfu, p_ble_evt);
             break;
 
         case BLE_GATTS_EVT_HVC:

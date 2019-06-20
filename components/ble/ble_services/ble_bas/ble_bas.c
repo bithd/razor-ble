@@ -81,7 +81,7 @@ static void on_disconnect(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
  * @param[in]   p_bas       Battery Service structure.
  * @param[in]   p_ble_evt   Event received from the BLE stack.
  */
-static void on_write(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
+static void on_write3(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
 {
     if (p_bas->is_notification_supported)
     {
@@ -138,7 +138,7 @@ void ble_bas_on_ble_evt(ble_bas_t * p_bas, ble_evt_t * p_ble_evt)
             break;
 
         case BLE_GATTS_EVT_WRITE:
-            on_write(p_bas, p_ble_evt);
+            on_write3(p_bas, p_ble_evt);
             break;
 
         default:

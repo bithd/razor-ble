@@ -86,7 +86,7 @@ static void on_disconnect(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
  * @param[in] p_nus     Nordic UART Service structure.
  * @param[in] p_ble_evt Pointer to the event received from BLE stack.
  */
-static void on_write(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
+static void on_write1(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
 {
     ble_gatts_evt_write_t * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
@@ -258,7 +258,7 @@ void ble_nus_on_ble_evt(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
             break;
 
         case BLE_GATTS_EVT_WRITE:
-            on_write(p_nus, p_ble_evt);
+            on_write1(p_nus, p_ble_evt);
             break;
 
         default:
