@@ -150,7 +150,7 @@ static void wait_for_pending(void)
 {
     while (flash_operation_pending == true)
     {
-        NRF_LOG_DEBUG("Waiting for other flash operation to finish.\r\n");
+        //NRF_LOG_DEBUG("Waiting for other flash operation to finish.\r\n");
         delay_operation();
     }
 }
@@ -161,7 +161,7 @@ static void wait_for_queue(void)
 #ifdef BLE_STACK_SUPPORT_REQD
     while (fs_queue_is_full())
     {
-        NRF_LOG_DEBUG("Waiting for available space on flash queue.\r\n");
+        //NRF_LOG_DEBUG("Waiting for available space on flash queue.\r\n");
         delay_operation();
     }
 #endif
@@ -177,7 +177,7 @@ uint32_t nrf_dfu_settings_calculate_crc(void)
 
 void nrf_dfu_settings_init(void)
 {
-    NRF_LOG_DEBUG("running nrf_dfu_settings_init\r\n");
+    //NRF_LOG_DEBUG("running nrf_dfu_settings_init\r\n");
 
     uint32_t crc;
 
@@ -197,7 +197,7 @@ void nrf_dfu_settings_init(void)
     }
 
     // Reached if nothing is configured or if CRC was wrong
-    NRF_LOG_DEBUG("!!!!!!!!!!!!!!! Resetting bootloader settings !!!!!!!!!!!\r\n");
+    //NRF_LOG_DEBUG("!!!!!!!!!!!!!!! Resetting bootloader settings !!!!!!!!!!!\r\n");
     memset(&s_dfu_settings, 0x00, sizeof(nrf_dfu_settings_t));
     s_dfu_settings.settings_version = NRF_DFU_SETTINGS_VERSION;
     APP_ERROR_CHECK(nrf_dfu_settings_write(NULL));
@@ -207,7 +207,7 @@ void nrf_dfu_settings_init(void)
 ret_code_t nrf_dfu_settings_write(dfu_flash_callback_t callback)
 {
     ret_code_t err_code = FS_SUCCESS;
-    NRF_LOG_DEBUG("Erasing old settings at: 0x%08x\r\n", (uint32_t)&m_dfu_settings_buffer[0]);
+    //NRF_LOG_DEBUG("Erasing old settings at: 0x%08x\r\n", (uint32_t)&m_dfu_settings_buffer[0]);
 
     // Wait for any ongoing operation (because of multiple calls to nrf_dfu_settings_write)
     wait_for_pending();
@@ -228,14 +228,14 @@ ret_code_t nrf_dfu_settings_write(dfu_flash_callback_t callback)
 
     if (err_code != FS_SUCCESS)
     {
-        NRF_LOG_ERROR("Erasing from flash memory failed.\r\n");
+        //NRF_LOG_ERROR("Erasing from flash memory failed.\r\n");
         flash_operation_pending = false;
         return NRF_ERROR_INTERNAL;
     }
 
     s_dfu_settings.crc = nrf_dfu_settings_calculate_crc();
 
-    NRF_LOG_DEBUG("Writing 0x%08x words\r\n", sizeof(nrf_dfu_settings_t)/4);
+    //NRF_LOG_DEBUG("Writing 0x%08x words\r\n", sizeof(nrf_dfu_settings_t)/4);
 
     static nrf_dfu_settings_t temp_dfu_settings;
     memcpy(&temp_dfu_settings, &s_dfu_settings, sizeof(nrf_dfu_settings_t));
@@ -253,12 +253,12 @@ ret_code_t nrf_dfu_settings_write(dfu_flash_callback_t callback)
 
     if (err_code != FS_SUCCESS)
     {
-        NRF_LOG_ERROR("Storing to flash memory failed.\r\n");
+        //NRF_LOG_ERROR("Storing to flash memory failed.\r\n");
         flash_operation_pending = false;
         return NRF_ERROR_INTERNAL;
     }
 
-    NRF_LOG_DEBUG("Writing settings...\r\n");
+    //NRF_LOG_DEBUG("Writing settings...\r\n");
     return NRF_SUCCESS;
 }
 

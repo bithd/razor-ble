@@ -52,9 +52,9 @@ uint32_t nrf_dfu_transports_init(void)
     uint32_t const num_transports = DFU_TRANS_SECTION_ITEM_COUNT;
     uint32_t ret_val = NRF_SUCCESS;
 
-    NRF_LOG_DEBUG("In nrf_dfu_transports_init\r\n");
+    //NRF_LOG_DEBUG("In nrf_dfu_transports_init\r\n");
 
-    NRF_LOG_DEBUG("num transports: %d\r\n", num_transports);
+    //NRF_LOG_DEBUG("num transports: %d\r\n", num_transports);
 
     for (uint32_t i = 0; i < num_transports; i++)
     {
@@ -66,7 +66,7 @@ uint32_t nrf_dfu_transports_init(void)
         }
     }
 
-    NRF_LOG_DEBUG("After nrf_dfu_transports_init\r\n");
+    //NRF_LOG_DEBUG("After nrf_dfu_transports_init\r\n");
 
     return ret_val;
 }

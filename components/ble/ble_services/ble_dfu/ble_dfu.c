@@ -277,11 +277,11 @@ static void on_ctrlpt_write(ble_dfu_t * p_dfu, ble_gatts_evt_write_t const * p_e
     }
 
     // Start executing the control point write action
-    NRF_LOG_INFO("on_ctrlpt_write: execute enter\r\n");
+    //NRF_LOG_INFO("on_ctrlpt_write: execute enter\r\n");
     switch (p_evt_write->data[0])
     {
         case BLE_DFU_ENTER_BOOTLOADER:
-            NRF_LOG_DEBUG("on_ctrlpt_write: execuing!!\r\n");
+            //NRF_LOG_DEBUG("on_ctrlpt_write: execuing!!\r\n");
             rsp_code = DFU_RSP_SUCCESS;
             break;
 
@@ -379,7 +379,7 @@ static void on_write2(ble_dfu_t * p_dfu, ble_evt_t const * p_ble_evt)
         // CCCD written, update indications state
         p_dfu->is_ctrlpt_indication_enabled = ble_srv_is_indication_enabled(p_evt_write->data);
 
-        NRF_LOG_INFO("Received indication state %d, notification state %d\r\n", p_dfu->is_ctrlpt_indication_enabled, ble_srv_is_notification_enabled(p_evt_write->data));
+        //NRF_LOG_INFO("Received indication state %d, notification state %d\r\n", p_dfu->is_ctrlpt_indication_enabled, ble_srv_is_notification_enabled(p_evt_write->data));
 
         if (p_dfu->evt_handler != NULL)
         {

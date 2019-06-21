@@ -138,7 +138,7 @@ static uint32_t nrf_dfu_app_continue(uint32_t               src_addr)
         if (ret_val != NRF_SUCCESS)
         {
             // We will not retry the copy
-            NRF_LOG_ERROR("Invalid data during compare: target: 0x%08x, src: 0x%08x\r\n", target_addr, src_addr);
+            //NRF_LOG_ERROR("Invalid data during compare: target: 0x%08x, src: 0x%08x\r\n", target_addr, src_addr);
             return ret_val;
         }
 
@@ -146,7 +146,7 @@ static uint32_t nrf_dfu_app_continue(uint32_t               src_addr)
         ret_val = nrf_dfu_flash_erase((uint32_t*) src_addr, split_size / CODE_PAGE_SIZE, NULL);
         if (ret_val != NRF_SUCCESS)
         {
-            NRF_LOG_ERROR("App update: Failure erasing page at addr: 0x%08x\r\n", src_addr);
+            //NRF_LOG_ERROR("App update: Failure erasing page at addr: 0x%08x\r\n", src_addr);
             return ret_val;
         }
 
@@ -165,17 +165,17 @@ static uint32_t nrf_dfu_app_continue(uint32_t               src_addr)
 
     if (crc == s_dfu_settings.bank_1.image_crc)
     {
-        NRF_LOG_DEBUG("Setting app as valid\r\n");
+        //NRF_LOG_DEBUG("Setting app as valid\r\n");
         s_dfu_settings.bank_0.bank_code = NRF_DFU_BANK_VALID_APP;
         s_dfu_settings.bank_0.image_crc = crc;
         s_dfu_settings.bank_0.image_size = image_size;
     }
     else
     {
-        NRF_LOG_ERROR("CRC computation failed for copied app: "
-                      "src crc: 0x%08x, res crc: 0x%08x\r\n",
-                      s_dfu_settings.bank_1.image_crc,
-                      crc);
+        //NRF_LOG_ERROR("CRC computation failed for copied app: "
+                      //"src crc: 0x%08x, res crc: 0x%08x\r\n",
+                      //s_dfu_settings.bank_1.image_crc,
+                      //crc);
     }
 
     nrf_dfu_invalidate_bank(&s_dfu_settings.bank_1);
@@ -235,7 +235,7 @@ static uint32_t nrf_dfu_sd_continue_impl(uint32_t             src_addr,
         ret_val = nrf_dfu_mbr_copy_sd((uint32_t*)target_addr, (uint32_t*)src_addr, split_size);
         if (ret_val != NRF_SUCCESS)
         {
-            NRF_LOG_ERROR("Failed to copy SD: target: 0x%08x, src: 0x%08x, len: 0x%08x\r\n", target_addr, src_addr, split_size);
+            //NRF_LOG_ERROR("Failed to copy SD: target: 0x%08x, src: 0x%08x, len: 0x%08x\r\n", target_addr, src_addr, split_size);
             return ret_val;
         }
 
@@ -245,7 +245,7 @@ static uint32_t nrf_dfu_sd_continue_impl(uint32_t             src_addr,
         ret_val = nrf_dfu_mbr_compare((uint32_t*)target_addr, (uint32_t*)src_addr, split_size);
         if (ret_val != NRF_SUCCESS)
         {
-            NRF_LOG_ERROR("Failed to Compare SD: target: 0x%08x, src: 0x%08x, len: 0x%08x\r\n", target_addr, src_addr, split_size);
+            //NRF_LOG_ERROR("Failed to Compare SD: target: 0x%08x, src: 0x%08x, len: 0x%08x\r\n", target_addr, src_addr, split_size);
             return ret_val;
         }
 
@@ -318,7 +318,7 @@ static uint32_t nrf_dfu_sd_continue(uint32_t             src_addr,
     ret_val = nrf_dfu_sd_continue_impl(src_addr, p_bank);
     if (ret_val != NRF_SUCCESS)
     {
-        NRF_LOG_ERROR("SD update continuation failed\r\n");
+        //NRF_LOG_ERROR("SD update continuation failed\r\n");
         return ret_val;
     }
 
@@ -382,7 +382,7 @@ static uint32_t nrf_dfu_bl_continue(uint32_t src_addr, nrf_dfu_bank_t * p_bank)
         ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)src_addr, len);
         if(ret_val != NRF_SUCCESS)
         {
-            NRF_LOG_ERROR("Request to copy BL failed\r\n");
+            //NRF_LOG_ERROR("Request to copy BL failed\r\n");
         }
     }
 
@@ -416,14 +416,14 @@ static uint32_t nrf_dfu_sd_bl_continue(uint32_t src_addr, nrf_dfu_bank_t * p_ban
     ret_val = nrf_dfu_sd_continue_impl(src_addr, p_bank);
     if (ret_val != NRF_SUCCESS)
     {
-        NRF_LOG_ERROR("SD+BL: SD copy failed\r\n");
+        //NRF_LOG_ERROR("SD+BL: SD copy failed\r\n");
         return ret_val;
     }
 
     ret_val = nrf_dfu_bl_continue(src_addr, p_bank);
     if (ret_val != NRF_SUCCESS)
     {
-        NRF_LOG_ERROR("SD+BL: BL copy failed\r\n");
+        //NRF_LOG_ERROR("SD+BL: BL copy failed\r\n");
         return ret_val;
     }
 
@@ -472,7 +472,7 @@ static uint32_t nrf_dfu_continue_bank(nrf_dfu_bank_t * p_bank, uint32_t src_addr
 
         case NRF_DFU_BANK_INVALID:
         default:
-            NRF_LOG_ERROR("Single: Invalid bank\r\n");
+            //NRF_LOG_ERROR("Single: Invalid bank\r\n");
             break;
     }
 
@@ -485,7 +485,7 @@ uint32_t nrf_dfu_continue(uint32_t * p_enter_dfu_mode)
     nrf_dfu_bank_t    * p_bank;
     uint32_t            src_addr = CODE_REGION_1_START;
 
-    NRF_LOG_DEBUG("Enter nrf_dfu_continue\r\n");
+    //NRF_LOG_DEBUG("Enter nrf_dfu_continue\r\n");
 
     if (s_dfu_settings.bank_layout == NRF_DFU_BANK_LAYOUT_SINGLE )
     {
@@ -508,11 +508,11 @@ uint32_t nrf_dfu_continue(uint32_t * p_enter_dfu_mode)
 
 bool nrf_dfu_app_is_valid(void)
 {
-    NRF_LOG_DEBUG("Enter nrf_dfu_app_is_valid\r\n");
+    //NRF_LOG_DEBUG("Enter nrf_dfu_app_is_valid\r\n");
     if (s_dfu_settings.bank_0.bank_code != NRF_DFU_BANK_VALID_APP)
     {
        // Bank 0 has no valid app. Nothing to boot
-       NRF_LOG_DEBUG("Return false in valid app check\r\n");
+       //NRF_LOG_DEBUG("Return false in valid app check\r\n");
        return false;
     }
 
@@ -526,12 +526,12 @@ bool nrf_dfu_app_is_valid(void)
         if (crc != s_dfu_settings.bank_0.image_crc)
         {
             // CRC does not match with what is stored.
-            NRF_LOG_DEBUG("Return false in CRC\r\n");
+            //NRF_LOG_DEBUG("Return false in CRC\r\n");
             return  false;
         }
     }
 
-    NRF_LOG_DEBUG("Return true. App was valid\r\n");
+    //NRF_LOG_DEBUG("Return true. App was valid\r\n");
     return true;
 }
 
@@ -583,7 +583,7 @@ uint32_t nrf_dfu_find_cache(uint32_t size_req, bool dual_bank_only, uint32_t * p
             // Not enough room in free space (bank_1)
             if ((dual_bank_only))
             {
-                NRF_LOG_ERROR("Failure: dual bank restriction\r\n");
+                //NRF_LOG_ERROR("Failure: dual bank restriction\r\n");
                 return NRF_ERROR_NO_MEM;
             }
 

@@ -743,7 +743,7 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
     on_ble_evt(p_ble_evt);
 }
 
-
+#if 0
 /**@brief       Function for the LEDs initialization.
  *
  * @details     Initializes all LEDs used by this application.
@@ -755,7 +755,7 @@ static void leds_init(void)
     nrf_gpio_pin_set(ADVERTISING_LED_PIN_NO);
     nrf_gpio_pin_set(CONNECTED_LED_PIN_NO);
 }
-
+#endif
 
 static uint32_t gap_address_change(void)
 {
@@ -1006,7 +1006,7 @@ uint32_t ble_dfu_transport_init(void)
 
     m_flags &= ~DFU_BLE_FLAG_NONE;
 
-    leds_init();
+    //leds_init();
 
     err_code = ble_stack_init(true);
     VERIFY_SUCCESS(err_code);
