@@ -10,7 +10,7 @@
 
 //#define DEVICE_NAME                     "RAZOR0000001"//"RAZOR"//                          /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "bithd.com"                       /**< Manufacturer. Will be passed to Device Information Service. */
-#define FW_VERSION                			"4.0.0"                       /**< FW. Will be passed to Device Information Service. */
+#define FW_VERSION                			"4.0.1"                       /**< FW. Will be passed to Device Information Service. */
 
 
 #define ONE_50MS_INTERVAL			   	APP_TIMER_TICKS(50) 
@@ -117,7 +117,6 @@
 #define TO_UPDATE				1
 
 #define INIT_CHARGE				0
-#define MV_CHARGE 				1
 #define YES_CHARGE				2
 
 //之后要替换成别的
@@ -260,6 +259,7 @@ extern uint8_t g_FlagApdufinsh;
 extern uint8_t g_UartFlag;
 extern uint8_t g_ChargeFlag;
 extern uint16_t g_BatLevel;
+extern uint16_t g_backBatLevel;
 extern uint8_t g_Key1Status;
 extern char DEVICE_NAME[20];
 extern uint32_t g_flashbuff[64];

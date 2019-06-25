@@ -101,14 +101,14 @@ void f_TimeDataDisPl(void)
 	if(touch_key==KEY_1)                              //judge the button touch
 	{ 
 		if(Ack_recive_enable==0)
-		{
-			#if 1
-			app_timer_stop(balance_id);                                                                  //stop time for Cycle to send
-			flagbalancestm32=0;		
-			app_timer_stop(Timeout3Sec_id);                                                              //stop time for Shutdown Timeouts
-			Timeout3Sec_StarFlag=TimeClose;			
-			touch_key=KEY_NO;                                                                            //clear flag
-			KeyWorkflag=1;                                                                               //button touch have been dell			
+		{			
+			#if 0
+			app_timer_stop(balance_id); 																 //stop time for Cycle to send
+			flagbalancestm32=0; 	
+			app_timer_stop(Timeout3Sec_id); 															 //stop time for Shutdown Timeouts
+			Timeout3Sec_StarFlag=TimeClose; 		
+			touch_key=KEY_NO;																			 //clear flag
+			KeyWorkflag=1;																				 //button touch have been dell			
 			memcpy(&g_apdu[stm32uartBUFstar],&DEVICE_NAME[5],12);
 			g_apdu[stm32uartBUFstar+12]=version_0;
 			g_apdu[stm32uartBUFstar+13]=version_1;

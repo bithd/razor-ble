@@ -5,7 +5,7 @@
 #include "nrf_error.h"
 #include "sdk_errors.h"
 
-#define adress PSTORAGE_DATA_START_ADDR+0x400
+#define adress PSTORAGE_DATA_START_ADDR
 //name&tk record id
 //#define COIN_FILE_ID     0x1111
 //#define BALLANCE_FILE_ID     0x1112
@@ -45,6 +45,9 @@ extern ret_code_t fds_read(uint8_t file_id,uint32_t *pdata,uint16_t *plen);
 extern void mcuflash_init(void);
 extern void read_flash(void);
 extern ret_code_t fds_usr_init(void);
+extern uint32_t  fs_usr_init(void);
+extern void usr_data_init(void);
+extern uint32_t usr_flag_save(void);
 
 #endif
 

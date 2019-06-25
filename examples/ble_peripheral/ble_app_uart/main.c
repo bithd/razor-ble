@@ -929,7 +929,7 @@ int main(void)
 	conn_params_init();	
 	peer_manager_init(erase_bonds);	
 	err_code =fds_usr_init();
-	//err_code =fds_test();
+	usr_data_init();
 	
 	APP_ERROR_CHECK(err_code);
 	vSYS_APPTimers_Start();

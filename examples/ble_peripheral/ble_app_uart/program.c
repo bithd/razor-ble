@@ -112,7 +112,7 @@ void firmwaresigned(void * p_event_data, uint16_t event_size)
 			app_timer_stop(Timeout3Sec_id);
 			Timeout3Sec_StarFlag=TimeClose;
 			PowerOff_key();
-      KEYwork_flag=0;
+     		KEYwork_flag=0;
 			Main_status=Main_status_closeoled;
 		}
 	}

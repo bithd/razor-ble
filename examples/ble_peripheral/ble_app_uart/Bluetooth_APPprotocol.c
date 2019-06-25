@@ -114,61 +114,36 @@ balance seting
 *************************/
 void setup_balance_f(unsigned char* value)
 {	
-//	unsigned char 	 i;
-//	unsigned char 	 buf[16];
-	//unsigned char	*p;
-
+	unsigned char	*p;
+	ret_code_t 		ret;
+	//uint16_t 		words;
+	uint8_t 		file_id=0x03;
+	//uint8_t 		flag_file_id=0x06;
+	//uint32_t 		back_buff[64];
+	
+	memset(g_flashbuff,0,sizeof(g_flashbuff));
     //update balance
     memcpy(&coinbalance,value,balnace_usefsize);
-//	p=(unsigned char*)&coinbalance;
+    
+	p=(unsigned char*)&coinbalance;
+
+	uint8_t* pfb = (uint8_t*) g_flashbuff;
+
+	memcpy(pfb,p, balnace_usefsize);
 	//flash storage
 	//Save balance data to flash
 
-	#if 0
-	for(uint8_t i=0;i<16;i++)
-	{
-		g_flashbuff[i] = uiSRAM_UcharToDword(&value[i*4]);
-	}
-	
-	fds_test_write(BALLANCE_FILE_ID,g_flashbuff,16);		
-	#endif
-	
-#if 0
-	for(i=0;i<4;i++)
-	{
-		pstorage_block_identifier_get(&base_handle,balance_storgeblock+i, &USEblock_handle);			
-		pstorage_wait_flag=1;
-		pstorage_clear(&USEblock_handle, 16);
-		while(pstorage_wait_flag==1);//wait clear flash
-		pstorage_wait_flag=1;
-		pstorage_store(&USEblock_handle,p+i*16,16,0);
-		while(pstorage_wait_flag==1);			
-	}
-#endif
+	ret = fds_test_write(file_id, g_flashbuff,60/4);	
 
-	#if 0
+	//test
+	//ret = fds_read(file_id, back_buff, &words);
+
 	//Save coinkind and flag
-	for(i=1;i<9;i++)
-	{
-		buf[i+7]=i;
-	}
-	for(uint8_t i=0;i<16;i++)
-	{
-		g_flashbuff[i] = uiSRAM_UcharToDword(&buf[i*4]);
-	}
+	//memset(g_flashbuff,0x55,sizeof(g_flashbuff));
 	
-	fds_test_write(FLAG_FILE_ID,g_flashbuff,2);
-	#endif
-	
-#if 0	
-    pstorage_block_identifier_get(&base_handle,65, &USEblock_handle);			
-	pstorage_wait_flag=1;
-	pstorage_clear(&USEblock_handle, 16);
-	while(pstorage_wait_flag==1);//wait clear flash
-	pstorage_wait_flag=1;
-	pstorage_store(&USEblock_handle,buf,16,0);
-	while(pstorage_wait_flag==1);	
-#endif
+	//ret = fds_test_write2(flag_file_id,g_flashbuff,16); 	
+
+	//ret = fds_read2(flag_file_id, buf123, &words);
 
 	Send_bluetoothdata(1);
 }
@@ -269,7 +244,7 @@ void download_cmdid_F(void)
 			PowerOn_key();
 		
 			Main_status=Main_status_download;
-		KEYwork_flag=1;
+			KEYwork_flag=1;
 			communicationBluetooth.data[0]=0x02;
 			communicationBluetooth.data[1]=0x00;
 			communicationBluetooth.data[2]=0x00;

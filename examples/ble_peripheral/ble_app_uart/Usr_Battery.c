@@ -120,7 +120,7 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
 			count++;
 		}					
 		
-        err_code = ble_bas_battery_level_update(&m_bas, percentage_batt_lvl);
+        err_code = ble_bas_battery_level_update(&m_bas, g_BatLevel);
         if (
             (err_code != NRF_SUCCESS)
             &&

@@ -90,6 +90,7 @@ ret_code_t fds_test_write(uint8_t file_id, uint32_t *pdata, uint16_t len)
 	record.key              	= REC_KEY;
 	record.data.p_chunks       	= &record_chunk;
 	record.data.num_chunks   	= 1;
+	fds_file_delete(FILE_ID+file_id);
 			
 	ret_code_t ret = fds_record_write(&g_record_desc, &record);
 	if (ret != FDS_SUCCESS)
@@ -206,8 +207,58 @@ ret_code_t fds_test(void)
 
 
 
+void usr_data_init(void)
+{	
+	uint8_t file_id=0x03;
+	//uint8_t flag_file_id=0x04;
+	//uint32_t buf123[4]={0};
+	//uint32_t buf456[4]={0x01,0x02,0x03,0x04};
+	uint32_t bak_coin_buf[16];
+	uint16_t words;
+	//uint8_t *pfb;
+	uint8_t *pfc;
+	//uint32_t ret;
+	
+	//ret = fds_read(flag_file_id, buf123, &words);
+	//if(ret != 0)
+	//{
+		//return;
+	//}
 
+	//pfb = (uint8_t *)buf123;
+	//pfc = (uint8_t *)buf456;
+	//if(buf123[0] == 0)//(0 == memcpy(pfb,pfc,16))
+	{
+		fds_read(file_id, bak_coin_buf, &words);
+		if(words == 0)
+		{
+			memset((uint8_t*)(&coinbalance),0,59);
+			return;
+		}
+		pfc = (uint8_t *)bak_coin_buf;
+		memcpy((uint8_t*)(&coinbalance),pfc,59);
+	}
+}
+#if 0
+uint32_t usr_flag_save(void)
+{
+	uint32_t err_code;
+	uint8_t buf[16]={0x5A,0xA5,0x5A,0xA5};
+//	uint8_t bak_buf[64];
+//	uint8_t *p;
+	
+	err_code = pstorage_block_identifier_get(&base_handle,1, &USEblock_handle);			
+	pstorage_wait_flag=1;
+	err_code = pstorage_clear(&USEblock_handle, 16);
+	while(pstorage_wait_flag==1);//wait clear flash
+	pstorage_wait_flag=1;
+	err_code = pstorage_store(&USEblock_handle,buf,16,0);//
+	while(pstorage_wait_flag==1);	
 
+	//p=(unsigned char*)(adress+0x10);
+	//memcpy(bak_buf,p,16);
+}
+#endif
 
 
 

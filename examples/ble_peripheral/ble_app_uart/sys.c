@@ -72,6 +72,7 @@ uint8_t g_FlagApdufinsh=RCV_INIT;
 uint8_t g_UartFlag=0;
 uint8_t g_ChargeFlag = INIT_CHARGE;
 uint16_t g_BatLevel = 0;
+uint16_t g_backBatLevel = 0;
 uint32_t g_flashbuff[64];
 uint16_t		buf_size=64;
 volatile uint8_t write_flag=0;
@@ -140,10 +141,23 @@ static void vSYS_Timer50MSHandler(void * p_context)
 	else
 	{			
 		if(GET_PWKEY_STATUS() == GPIO_LOW)
-		{			
-			touch_key = KEY_1;
-			g_Key1Status = PUT_UP;
-			s_LongPressCount = 0;     //Release reset 0
+		{	
+			if((Main_status_download==Main_status)||(Main_status_blekey==Main_status))
+			{}
+			else
+			{
+				//if(touch_key_flag==1)
+				{
+					//if(0==KeyWorkflag)
+					{
+						touch_key = KEY_1;
+						g_Key1Status = PUT_UP;
+						s_LongPressCount = 0;     //Release reset 0						
+					}
+				}
+			}	
+			//touch_key_flag=0x00;
+			//KeyWorkflag=0;
 		}
 	}
 
@@ -178,8 +192,25 @@ static void vSYS_Timer50MSHandler(void * p_context)
 			
 		if(GET_KEY2_STATUS() == GPIO_HIGH)
 		{
-			touch_key = KEY_1;
-			g_Key2Status = PUT_UP;
+			if((Main_status_download==Main_status)||(Main_status_blekey==Main_status))
+			{}
+			else
+			{
+				//if(touch_key_flag==1)
+				{
+					//if(0==KeyWorkflag)
+					{
+						touch_key = KEY_1;
+						g_Key2Status = PUT_UP;
+						s_LongPressCount = 0;     //Release reset 0						
+					}
+				}
+			}	
+			//touch_key_flag=0x00;
+			//KeyWorkflag=0;
+			
+			//touch_key = KEY_1;
+			//g_Key2Status = PUT_UP;
 		}
 	}
 
