@@ -53,7 +53,21 @@ void saadc_event_handler(nrf_drv_saadc_evt_t const * p_event)
 			percentage_batt_lvl = battery_level_in_percent(batt_min_mv);
 			adc_sample = 4*batt_min_mv;
 			g_bak_AdcSample = adc_sample;
-			g_BatLevel = percentage_batt_lvl;
+			if(g_ChargeFlag == INIT_CHARGE)  //No Charge
+			{
+				if((percentage_batt_lvl<g_BatLevel)||(g_BatLevel == 0))
+				{
+					g_BatLevel = percentage_batt_lvl;
+				}
+			}
+			else if(g_ChargeFlag == YES_CHARGE)
+			{
+				if((percentage_batt_lvl>g_BatLevel)||(g_BatLevel == 0))
+				{
+					g_BatLevel = percentage_batt_lvl;
+				}
+			}
+
         }else if(flag == 1)
         {
 			flag = 2;
