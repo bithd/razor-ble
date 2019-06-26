@@ -115,7 +115,7 @@ balance seting
 void setup_balance_f(unsigned char* value)
 {	
 	unsigned char	*p;
-	ret_code_t 		ret;
+	//ret_code_t 		ret;
 	//uint16_t 		words;
 	uint8_t 		file_id=0x03;
 	//uint8_t 		flag_file_id=0x06;
@@ -133,7 +133,7 @@ void setup_balance_f(unsigned char* value)
 	//flash storage
 	//Save balance data to flash
 
-	ret = fds_test_write(file_id, g_flashbuff,60/4);	
+	fds_test_write(file_id, g_flashbuff,60/4);	
 
 	//test
 	//ret = fds_read(file_id, back_buff, &words);
@@ -326,8 +326,7 @@ void blueKEY_cmdid_F(void)
 			//nrf_delay_ms(delaytime);
 			firmwaredownload_GPIO_H();//APP mode
 
-//			nrf_gpio_pin_set(SlectPin);
-      nrf_gpio_pin_clear(SlectPin);
+      		nrf_gpio_pin_clear(SlectPin);
       		STM_POWER_ON();
       		nrf_delay_ms(delaytime);
 			PowerOn_key();
@@ -443,17 +442,19 @@ void firmware_signed_F(void)
 
 void bluetoothupdate_F(void)
 {
-	unsigned char i;
+	//unsigned char i;
 
 	Send_bluetoothdata(1);
 	app_sched_event_put(NULL,NULL, Bluetooth_ReciveANDSend);
-	
+
+	#if 0
 	for(i=0;i<20;i++){
 	app_sched_execute(); 
   sd_app_evt_wait();  
 	}
 //	sd_power_gpregret_set(0xb1);
 	NVIC_SystemReset();
+	#endif
 }
 
 

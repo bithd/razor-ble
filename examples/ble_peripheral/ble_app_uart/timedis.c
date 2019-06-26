@@ -96,7 +96,6 @@ void f_TimeDataDisPl(void)
 {
 	BluToDis();                                       //get the bluetooth state
 	Bat();                                            //get battery level
-	TimDataToDis();                                   //get time update the display buffer
 	
 	if(touch_key==KEY_1)                              //judge the button touch
 	{ 
