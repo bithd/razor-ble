@@ -34,7 +34,7 @@ void progam_closeoled(void * p_event_data, uint16_t event_size)
 		{
 			 firmwaredownload_GPIO_H();
 			 nrf_gpio_pin_clear(SlectPin);
-			 PowerOn_key();
+			 PowerOn_key2();
 
 			if((adc_sample<Warning_Voltage)&&(USB_connectFLag==USBDisconnect))
 			{

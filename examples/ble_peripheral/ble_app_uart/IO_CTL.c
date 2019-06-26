@@ -264,6 +264,18 @@ void firmwaredownload_GPIO_L(void)
 void PowerOn_key(void)
 {
 	//nrf_gpio_pin_set(STM_POWER_CTL_PIN);
+  	nrf_delay_ms(delaytime);
+	if(uart_enable_flag==0)
+	{
+		uart_init();
+	}	
+	nrf_delay_ms(delaytime);
+	poweronkey_flag=1;
+}
+
+void PowerOn_key2(void)
+{
+	//nrf_gpio_pin_set(STM_POWER_CTL_PIN);
   	//nrf_delay_ms(delaytime);
 	if(uart_enable_flag==0)
 	{

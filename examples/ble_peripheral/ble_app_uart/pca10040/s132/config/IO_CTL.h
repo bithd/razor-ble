@@ -123,6 +123,7 @@ void FirmwareDownload(void);
 void firmwaredownload_GPIO_H(void);
 void PowerOff_key(void);
 void PowerOn_key(void);
+void PowerOn_key2(void);
 
 //void vIO_SetGpioInput(void);
 //void vIO_SetGpioOutput(void);
