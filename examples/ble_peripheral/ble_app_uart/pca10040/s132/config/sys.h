@@ -12,6 +12,7 @@
 #define MANUFACTURER_NAME               "bithd.com"                       /**< Manufacturer. Will be passed to Device Information Service. */
 #define FW_VERSION                			"4.0.1"                       /**< FW. Will be passed to Device Information Service. */
 
+//#define DFU_SUPPORT 					1
 
 #define ONE_50MS_INTERVAL			   	APP_TIMER_TICKS(50) 
 #define ONE_SECOND_INTERVAL			   	APP_TIMER_TICKS(500) 

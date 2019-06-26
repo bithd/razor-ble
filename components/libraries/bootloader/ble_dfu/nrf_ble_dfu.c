@@ -58,11 +58,11 @@
 #define ADVERTISING_LED_PIN_NO              BSP_LED_0                                               /**< Is on when device is advertising. */
 #define CONNECTED_LED_PIN_NO                BSP_LED_1                                               /**< Is on when device has connected. */
 
-#define DEVICE_NAME                         "DfuTarg"                                               /**< Name of device. Will be included in the advertising data. */
-#define MANUFACTURER_NAME                   "NordicSemiconductor"                                   /**< Manufacturer. Will be passed to Device Information Service. */
+#define DEVICE_NAME                         "BithdDFU"                                               /**< Name of device. Will be included in the advertising data. */
+#define MANUFACTURER_NAME                   "bithd.com"                                   /**< Manufacturer. Will be passed to Device Information Service. */
 
-#define MIN_CONN_INTERVAL                   (uint16_t)(MSEC_TO_UNITS(15, UNIT_1_25_MS))             /**< Minimum acceptable connection interval. */
-#define MAX_CONN_INTERVAL_MS                30                                                      /**< Maximum acceptable connection interval in milliseconds. */
+#define MIN_CONN_INTERVAL                   (uint16_t)(MSEC_TO_UNITS(7.5, UNIT_1_25_MS))             /**< Minimum acceptable connection interval. */
+#define MAX_CONN_INTERVAL_MS                20                                                      /**< Maximum acceptable connection interval in milliseconds. */
 #define MAX_CONN_INTERVAL                   (uint16_t)(MSEC_TO_UNITS(MAX_CONN_INTERVAL_MS, UNIT_1_25_MS))   /**< Maximum acceptable connection interval . */
 #define SLAVE_LATENCY                       0                                                       /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                    (4 * 100)                                               /**< Connection supervisory timeout (4 seconds). */

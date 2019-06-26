@@ -105,6 +105,7 @@ typedef struct
  */
 uint32_t ble_dfu_transport_init(void);
 
+void usr_timers_start(void);
 
 /**@brief      Function for closing down the DFU Service and disconnecting from the host.
  *

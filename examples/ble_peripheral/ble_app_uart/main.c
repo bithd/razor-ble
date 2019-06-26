@@ -34,6 +34,12 @@
 #include "flashmcu_bithd.h"
 #include "ble_bithd.h"
 #include "Timer_Interrupt_Function.h"
+#include "sys.h"
+#include "flashmcu_bithd.h"
+
+#ifdef DFU_SUPPORT
+#include "ble_dfu.h"
+#endif
 
 #if BLE_BAS_ENABLED
 #include "ble_bas.h"
@@ -47,6 +53,15 @@
 #else
 #include "nrf_drv_saadc.h"
 #endif //ADC_PRESENT
+
+
+#define SOFTWARE_VERSION_STR				"4.0.1"
+#define MODEL_NUMBER								"RAZOR"
+#define SERIAL_NUMBER								"000000003"
+#define HARDWARE_VERSION						"H001"
+#define FIRMWARE_VERSION						"4.0.1"
+#define SOFTWARE_VERSION						SOFTWARE_VERSION_STR
+#define MANUFACTURER_NAME						"bithd.com"
 
 #define CONN_CFG_TAG                    1                                           /**< A tag that refers to the BLE stack configuration we set with @ref sd_ble_cfg_set. Default tag is @ref BLE_CONN_CFG_TAG_DEFAULT. */
 
@@ -114,6 +129,9 @@ static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, 
 static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};
 #endif
 
+#ifdef DFU_SUPPORT
+static ble_dfu_t      m_dfus;  
+#endif
 
 extern void peer_manager_init(bool erase_bonds);
 /**@brief Function for assert macro callback.
@@ -222,7 +240,29 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
 #endif    
 }
 /**@snippet [Handling the data received over BLE] */
+#ifdef DFU_SUPPORT
+static void ble_dfu_evt_handler(ble_dfu_t * p_dfu, ble_dfu_evt_t * p_evt)
+{
+    switch (p_evt->type)
+    {
+        case BLE_DFU_EVT_INDICATION_DISABLED:
+            //NRF_LOG_INFO("Indication for BLE_DFU is disabled.\r\n");
+            break;
 
+        case BLE_DFU_EVT_INDICATION_ENABLED:
+            //NRF_LOG_INFO("Indication for BLE_DFU is enabled.\r\n");
+            break;
+
+        case BLE_DFU_EVT_ENTERING_BOOTLOADER:
+            //NRF_LOG_INFO("Device is requested to enter bootloader mode!\r\n");
+            break;
+
+        default:
+            //NRF_LOG_INFO("Unknown event from ble_dfu.\r\n");
+            break;
+    }
+}
+#endif
 /*****************************************************************************
  ∫Ø ˝:  services_init
   ‰»Î:	Œﬁ
@@ -261,6 +301,20 @@ static void services_init(void)
 
     err_code = ble_nus_init(&m_nus, &nus_init);
     APP_ERROR_CHECK(err_code);
+		
+#ifdef DFU_SUPPORT
+    ble_dfu_init_t dfus_init;
+
+    // Initialize the Device Firmware Update Service.
+    memset(&dfus_init, 0, sizeof(dfus_init));
+
+    dfus_init.evt_handler                               = ble_dfu_evt_handler;
+    dfus_init.ctrl_point_security_req_write_perm        = SEC_SIGNED;
+    dfus_init.ctrl_point_security_req_cccd_write_perm   = SEC_SIGNED;
+
+    err_code = ble_dfu_init(&m_dfus, &dfus_init);
+    APP_ERROR_CHECK(err_code);
+#endif
 }
 
 /*****************************************************************************
@@ -568,6 +622,9 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 	ble_conn_params_on_ble_evt(p_ble_evt);
 	on_ble_evt(p_ble_evt);
 	ble_advertising_on_ble_evt(p_ble_evt);
+#ifdef DFU_SUPPORT	
+	ble_dfu_on_ble_evt(&m_dfus, p_ble_evt);
+#endif
 	nrf_ble_gatt_on_ble_evt(&m_gatt, p_ble_evt);
 }
 
@@ -619,7 +676,13 @@ static void ble_stack_init(void)
 
     // Overwrite some of the default configurations for the BLE stack.
     ble_cfg_t ble_cfg;
-
+#ifdef DFU_SUPPORT
+    // Configure the number of custom UUIDS.
+    memset(&ble_cfg, 0, sizeof(ble_cfg));
+    ble_cfg.common_cfg.vs_uuid_cfg.vs_uuid_count = 2;
+    err_code = sd_ble_cfg_set(BLE_COMMON_CFG_VS_UUID, &ble_cfg, ram_start);
+    APP_ERROR_CHECK(err_code);
+#endif
     // Configure the maximum number of connections.
     memset(&ble_cfg, 0, sizeof(ble_cfg));
     ble_cfg.gap_cfg.role_count_cfg.periph_role_count  = BLE_GAP_ROLE_COUNT_PERIPH_DEFAULT;

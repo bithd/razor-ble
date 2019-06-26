@@ -71,15 +71,31 @@
  */
 __WEAK bool nrf_dfu_enter_check(void)
 {
+//	uint8_t buff[16];
+//	uint8_t *p;
+	
+#if 0
     if (nrf_gpio_pin_read(BOOTLOADER_BUTTON) == 0)
     {
         return true;
     }
+#endif
+#if 0
+	p=(unsigned char*)(0x68000+0x10);
+	memcpy(buff,p,16);
+	if((buff[0] == 0x5A)&&(buff[1] == 0xA5)&&(buff[2] == 0x5A)&&(buff[3] == 0xA5))
+	{
+		return true;
+	}
+#endif
 
+	#if 1
     if(NRF_POWER->GPREGRET == BOOTLOADER_DFU_START)
     {
         return true;
     }
+    #endif
+	
 
     if (s_dfu_settings.enter_buttonless_dfu == 1)
     {
@@ -94,20 +110,56 @@ __WEAK bool nrf_dfu_enter_check(void)
 // Internal Functions
 static void reset_delay_timer_handler(void * p_context)
 {
-    NRF_LOG_DEBUG("Reset delay timer expired, resetting.\r\n");
+    ////NRF_LOG_ERROR("Reset delay timer expired, resetting.\r\n");
 #ifdef NRF_DFU_DEBUG_VERSION
     nrf_delay_ms(100);
 #endif
     NVIC_SystemReset();
 }
 
+static void timer_shutdown_handler(void * p_context)
+{
+	static uint8_t s_LongPressCount = 0;
+	static uint32_t s_AutoShutdownCount=0;
+	
+	s_AutoShutdownCount++;
+	if(s_AutoShutdownCount>36000)
+	{
+		nrf_gpio_pin_clear(16);
+		nrf_gpio_pin_clear(9);	
+		while(1);
+	}
+		//long press
+	if(nrf_gpio_pin_read(8) == 1)
+	{
+		s_LongPressCount++;
+		s_AutoShutdownCount = 0;
+		if(s_LongPressCount >= 15)
+		{
+			s_LongPressCount = 0;
+			nrf_gpio_pin_clear(16);
+			nrf_gpio_pin_clear(9);	
+			while(1);
+		}
+	}
+}
+
+void usr_timers_start(void)
+{
+	uint32_t err_code = app_timer_start(nrf_dfu_utils_shutdown_timer, APP_TIMER_TICKS(SHUTDOWN_BASE_DELAY_MS), NULL);
+	APP_ERROR_CHECK(err_code);
+}
 /**@brief Function for initializing the timer handler module (app_timer).
  */
 static void timers_init(void)
 {
     APP_ERROR_CHECK(app_timer_init());
     APP_ERROR_CHECK( app_timer_create(&nrf_dfu_utils_reset_delay_timer, APP_TIMER_MODE_SINGLE_SHOT, reset_delay_timer_handler) );
+	//System Shut Down
+		APP_ERROR_CHECK(app_timer_create(&nrf_dfu_utils_shutdown_timer,APP_TIMER_MODE_REPEATED,timer_shutdown_handler));
+		usr_timers_start();
 }
+
 
 
 /** @brief Function for event scheduler initialization.
@@ -150,7 +202,7 @@ uint32_t nrf_dfu_init()
     uint32_t ret_val = NRF_SUCCESS;
     uint32_t enter_bootloader_mode = 0;
 
-    NRF_LOG_DEBUG("In real nrf_dfu_init\r\n");
+    ////NRF_LOG_ERROR("In real nrf_dfu_init\r\n");
 
     nrf_dfu_settings_init();
     timers_init();
@@ -160,7 +212,7 @@ uint32_t nrf_dfu_init()
     ret_val = nrf_dfu_continue(&enter_bootloader_mode);
     if(ret_val != NRF_SUCCESS)
     {
-        NRF_LOG_DEBUG("Could not continue DFU operation: 0x%08x\r\n", ret_val);
+        ////NRF_LOG_ERROR("Could not continue DFU operation: 0x%08x\r\n", ret_val);
         enter_bootloader_mode = 1;
     }
 
@@ -168,7 +220,7 @@ uint32_t nrf_dfu_init()
     // besides the effect of the continuation
     if (nrf_dfu_enter_check())
     {
-        NRF_LOG_DEBUG("Application sent bootloader request\n");
+        ////NRF_LOG_ERROR("Application sent bootloader request\n");
         enter_bootloader_mode = 1;
     }
 
@@ -182,25 +234,25 @@ uint32_t nrf_dfu_init()
         ret_val = nrf_dfu_transports_init();
         if (ret_val != NRF_SUCCESS)
         {
-            NRF_LOG_ERROR("Could not initalize DFU transport: 0x%08x\r\n", ret_val);
+            //NRF_LOG_ERROR("Could not initalize DFU transport: 0x%08x\r\n", ret_val);
             return ret_val;
         }
 
         (void)nrf_dfu_req_handler_init();
 
         // This function will never return
-        NRF_LOG_DEBUG("Waiting for events\r\n");
+        ////NRF_LOG_ERROR("Waiting for events\r\n");
         wait_for_event();
-        NRF_LOG_DEBUG("After waiting for events\r\n");
+        ////NRF_LOG_ERROR("After waiting for events\r\n");
     }
 
     if (nrf_dfu_app_is_valid())
     {
-        NRF_LOG_DEBUG("Jumping to: 0x%08x\r\n", MAIN_APPLICATION_START_ADDR);
+        ////NRF_LOG_ERROR("Jumping to: 0x%08x\r\n", MAIN_APPLICATION_START_ADDR);
         nrf_bootloader_app_start(MAIN_APPLICATION_START_ADDR);
     }
 
     // Should not be reached!
-    NRF_LOG_INFO("After real nrf_dfu_init\r\n");
+    //NRF_LOG_INFO("After real nrf_dfu_init\r\n");
     return NRF_SUCCESS;
 }

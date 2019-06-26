@@ -50,7 +50,10 @@
 
 
 static app_timer_t nrf_dfu_utils_reset_delay_timer_data = { {0} };
+static app_timer_t m_shutdown_timer_data = { {0} };
+
 const app_timer_id_t nrf_dfu_utils_reset_delay_timer = &nrf_dfu_utils_reset_delay_timer_data;
+const app_timer_id_t nrf_dfu_utils_shutdown_timer = &m_shutdown_timer_data;
 
 /**
  * Round up val to the next page boundry

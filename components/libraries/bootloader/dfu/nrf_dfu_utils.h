@@ -61,8 +61,10 @@ extern "C"
 // 7500ms is the smallest stable value with nrf connect for Android v1.1.1.
 // Smaller values may allow the device to reset before the next DFU transation is started.
 #define RESET_DELAY_LENGTH_MS   10000
+#define SHUTDOWN_BASE_DELAY_MS	100
 extern const app_timer_id_t nrf_dfu_utils_reset_delay_timer;
-
+extern const app_timer_id_t nrf_dfu_utils_shutdown_timer;
+	
 /** @brief Function for continuing an ongoing DFU operation.
  *
  * @details     This function initiates or continues the DFU copy-back
