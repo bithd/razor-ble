@@ -135,29 +135,21 @@ static void vSYS_Timer50MSHandler(void * p_context)
 		if(GET_PWKEY_STATUS() == GPIO_HIGH)
 		{			
 			g_timeout_shutdown = SHUTDOWN_TIME;
-			g_Key1Status = PRESS_DOWN;
+			if((Main_status_download==Main_status)||(Main_status_blekey==Main_status))
+			{}
+			else
+			{
+				g_Key1Status = PRESS_DOWN;				
+			}			
 		}
 	}
 	else
 	{			
 		if(GET_PWKEY_STATUS() == GPIO_LOW)
 		{	
-			if((Main_status_download==Main_status)||(Main_status_blekey==Main_status))
-			{}
-			else
-			{
-				//if(touch_key_flag==1)
-				{
-					//if(0==KeyWorkflag)
-					{
-						touch_key = KEY_1;
-						g_Key1Status = PUT_UP;
-						s_LongPressCount = 0;     //Release reset 0						
-					}
-				}
-			}	
-			//touch_key_flag=0x00;
-			//KeyWorkflag=0;
+			touch_key = KEY_1;
+			g_Key1Status = PUT_UP;
+			s_LongPressCount = 0;     //Release reset 0								
 		}
 	}
 
@@ -183,7 +175,12 @@ static void vSYS_Timer50MSHandler(void * p_context)
 		if(GET_KEY2_STATUS() == GPIO_LOW)
 		{			
 			g_timeout_shutdown = SHUTDOWN_TIME;
-			g_Key2Status = PRESS_DOWN;
+			if((Main_status_download==Main_status)||(Main_status_blekey==Main_status))
+			{}
+			else
+			{
+				g_Key2Status = PRESS_DOWN;				
+			}			
 			
 		}
 	}
@@ -191,26 +188,10 @@ static void vSYS_Timer50MSHandler(void * p_context)
 	{	
 			
 		if(GET_KEY2_STATUS() == GPIO_HIGH)
-		{
-			if((Main_status_download==Main_status)||(Main_status_blekey==Main_status))
-			{}
-			else
-			{
-				//if(touch_key_flag==1)
-				{
-					//if(0==KeyWorkflag)
-					{
-						touch_key = KEY_1;
-						g_Key2Status = PUT_UP;
-						s_LongPressCount = 0;     //Release reset 0						
-					}
-				}
-			}	
-			//touch_key_flag=0x00;
-			//KeyWorkflag=0;
-			
-			//touch_key = KEY_1;
-			//g_Key2Status = PUT_UP;
+		{		
+			touch_key = KEY_1;
+			g_Key2Status = PUT_UP;
+			s_LongPressCount = 0;     //Release reset 0											
 		}
 	}
 
